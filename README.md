@@ -1,2 +1,3 @@
 # java-pain
-Repo to study Java and OOP
+
+Monorepo to study Java and OOP at uni
