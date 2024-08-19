@@ -1,5 +1,8 @@
 {
   "java.format.enabled": true,
   "editor.formatOnSave": true,
-  "java.format.settings.url": "eclipse-formatter.xml"
+  "java.format.settings.url": "eclipse-formatter.xml",
+  "java.dependency.syncWithFolderExplorer": false,
+  "java.dependency.packagePresentation": "hierarchical",
+  "maven.view": "flat"
 }
