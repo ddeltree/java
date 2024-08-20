@@ -4,5 +4,6 @@
   "java.format.settings.url": "eclipse-formatter.xml",
   "java.dependency.syncWithFolderExplorer": false,
   "java.dependency.packagePresentation": "hierarchical",
-  "maven.view": "flat"
+  "maven.view": "flat",
+  "java.format.settings.profile": "GoogleStyle"
 }

@@ -38,13 +38,9 @@
    <left>
       <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-            <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="355.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" prefHeight="355.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <content>
-                  <AnchorPane>
-                     <children>
-                        <TreeView fx:id="fileTree" prefHeight="353.0" prefWidth="198.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                     </children>
-                  </AnchorPane>
+                  <TreeView fx:id="fileTree" showRoot="false" />
                </content>
             </ScrollPane>
          </children>
