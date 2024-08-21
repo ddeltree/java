@@ -1,11 +1,9 @@
 package br.ufal;
 
-import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
@@ -16,18 +14,14 @@ import javafx.util.Callback;
 import java.io.File;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Iterator;
 import java.nio.file.Path;
 
 public class RootController {
-
-  private static boolean showHidden = false;
 
   @FXML
   private Menu editMenuItem;
@@ -41,19 +35,22 @@ public class RootController {
   @FXML
   private void initialize() {
     String homeDirectory = System.getProperty("user.home");
-    File cwd = new File(homeDirectory);
-    fileTree.setRoot(new TreeItem<>(cwd));
-    for (File child : cwd.listFiles()) {
-      if (child.isDirectory())
-        fileTree.getRoot().getChildren().add(new TreeItem<>(child));
+    File userHome = new File(homeDirectory);
+    TreeItem<File> rootItem = new TreeItem<>(userHome);
+    fileTree.setRoot(rootItem);
+    TreeItem<File> homeItem = new TreeItem<>(userHome);
+    rootItem.getChildren().add(homeItem);
+    for (File rootDir : File.listRoots()) {
+      TreeItem<File> item = new TreeItem<>(rootDir);
+      rootItem.getChildren().add(item);
     }
+
+    addTreeItemChildren(homeItem, userHome.listFiles());
     sortTreeChildren(fileTree.getRoot().getChildren());
     fileTree.setCellFactory(new Callback<TreeView<File>, TreeCell<File>>() {
       @Override
       public TreeCell<File> call(TreeView<File> tree) {
         return new TreeCell<File>() {
-          List<TreeItem<File>> hiddenItems = new ArrayList<>();
-
           @Override
           protected void updateItem(File item, boolean empty) {
             super.updateItem(item, empty);
@@ -64,43 +61,36 @@ public class RootController {
             }
             this.setText(item.getName());
             File file = this.getItem();
-            TreeItem<File> treeItem = this.getTreeItem();
-            ObservableList<TreeItem<File>> children = treeItem.getChildren();
             if (file.isDirectory())
               this.setGraphic(createArrowGraphic());
             else
               this.setGraphic(null);
 
-            ShowHiddenObserver.addListener(showHidden -> {
-              List<TreeItem<File>> c = new ArrayList<>(children);
-              for (int i = 0; i < c.size(); i++) {
-                TreeItem<File> child = c.get(i);
-                if (child.getValue().getName().startsWith(".")) {
-                  if (!showHidden) {
-                    hiddenItems.add(child);
-                    children.remove(child);
-                  }
-                }
-              }
-            });
             this.setOnMouseClicked(e -> {
               if (this.isEmpty())
                 return;
+              TreeItem<File> treeItem = this.getTreeItem();
+              ObservableList<TreeItem<File>> children = treeItem.getChildren();
               if (file.isDirectory() && children.isEmpty()) {
-                for (File child : file.listFiles()) {
-                  if (child.isDirectory())
-                    children.add(new TreeItem<File>(child));
-                }
+                addTreeItemChildren(treeItem, file.listFiles());
                 sortTreeChildren(children);
                 treeItem.setExpanded(true);
-              } else if (file.isFile()) {
+              } else if (file.isFile())
                 System.out.println(file.getPath()); // TODO open file
-              }
             });
           }
         };
       }
     });
+  }
+
+  private void addTreeItemChildren(TreeItem<File> item, File... children) {
+    if (children == null)
+      return;
+    for (File child : children) {
+      if (child.isDirectory() && !child.getName().startsWith("."))
+        item.getChildren().add(new TreeItem<>(child));
+    }
   }
 
   private Node createArrowGraphic() {

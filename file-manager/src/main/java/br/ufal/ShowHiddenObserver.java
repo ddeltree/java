@@ -12,6 +12,7 @@ abstract class ShowHiddenObserver {
 
   public static void toggleShowHidden() {
     showHidden = !showHidden;
+    System.out.println("Hide: " + showHidden);
     for (Listener hl : listeners)
       hl.onToggleHidden(showHidden);
   }
