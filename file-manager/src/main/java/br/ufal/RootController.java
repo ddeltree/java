@@ -1,7 +1,10 @@
 package br.ufal;
 
+import javafx.beans.Observable;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Menu;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
@@ -11,6 +14,13 @@ import javafx.util.Callback;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Iterator;
+import java.nio.file.Path;
 
 public class RootController {
 
@@ -27,22 +37,19 @@ public class RootController {
   private void initialize() {
     String homeDirectory = System.getProperty("user.home");
     File cwd = new File(homeDirectory);
-
-    TreeItem<File> root = new TreeItem<>(cwd);
-    Collection<TreeItem<File>> children = root.getChildren();
-    if (cwd.isDirectory()) {
-      for (File file : cwd.listFiles()) {
-        if (file.getName().startsWith(".")) {
-          continue;
-        }
-        TreeItem<File> item = new TreeItem<>(file);
-        children.add(item);
-      }
+    fileTree.setRoot(new TreeItem<>(cwd));
+    for (File child : cwd.listFiles()) {
+      fileTree.getRoot().getChildren().add(new TreeItem<>(child));
     }
-    fileTree.setCellFactory(new Callback<TreeView<File>, TreeCell<File>>() {
+    fileTree.getRoot().getChildren().sort(new Comparator<>() {
+      public int compare(TreeItem<File> file1, TreeItem<File> file2) {
+        return file1.getValue().getName().compareToIgnoreCase(file2.getValue().getName());
+      }
+    });
+    this.fileTree.setCellFactory(new Callback<TreeView<File>, TreeCell<File>>() {
       @Override
-      public TreeCell<File> call(TreeView<File> fileTree) {
-        return new TreeCell<>() {
+      public TreeCell<File> call(TreeView<File> tree) {
+        return new TreeCell<File>() {
           @Override
           protected void updateItem(File item, boolean empty) {
             super.updateItem(item, empty);
@@ -51,9 +58,16 @@ public class RootController {
               this.setGraphic(null);
             } else {
               this.setText(item.getName());
-              // Add event handler for mouse clicks
               this.setOnMouseClicked(e -> {
-                if (!this.isEmpty()) {
+                if (this.isEmpty())
+                  return;
+                if (this.getItem().isDirectory() && this.getTreeItem().getChildren().isEmpty()) {
+                  for (File child : this.getItem().listFiles()) {
+                    this.getTreeItem().getChildren().add(new TreeItem<File>(child));
+                  }
+                  this.getTreeItem().setExpanded(true);
+                } else if (this.getItem().isFile()) {
+                  // TODO open file
                   System.out.println("Clicked on: " + this.getItem().getName());
                 }
               });
@@ -62,11 +76,18 @@ public class RootController {
         };
       }
     });
-    fileTree.setRoot(root);
   }
 
-  void pushTreeItem(File item) {
-
+  void addTreeFile(File file) {
+    Queue<Iterator<TreeItem<File>>> queue = new LinkedList<>();
+    queue.add(this.fileTree.getRoot().getChildren().iterator());
+    do {
+      queue.peek().forEachRemaining(child -> {
+        Path path = Path.of(file.getAbsolutePath()).relativize(Path.of(child.getValue().getAbsolutePath()));
+        System.out.println(path.toString() == "");
+      });
+      queue.poll();
+    } while (queue.peek() != null);
   }
 
   @FXML
