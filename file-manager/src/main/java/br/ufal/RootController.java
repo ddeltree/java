@@ -42,7 +42,8 @@ public class RootController {
     File cwd = new File(homeDirectory);
     fileTree.setRoot(new TreeItem<>(cwd));
     for (File child : cwd.listFiles()) {
-      fileTree.getRoot().getChildren().add(new TreeItem<>(child));
+      if (child.isDirectory())
+        fileTree.getRoot().getChildren().add(new TreeItem<>(child));
     }
     sortTreeChildren(fileTree.getRoot().getChildren());
     fileTree.setCellFactory(new Callback<TreeView<File>, TreeCell<File>>() {
@@ -58,41 +59,42 @@ public class RootController {
               return;
             }
             this.setText(item.getName());
-            if (this.getItem().isDirectory()) {
+            File file = this.getItem();
+            if (file.isDirectory())
               this.setGraphic(createArrowGraphic());
-            } else {
+            else
               this.setGraphic(null);
-            }
             this.setOnMouseClicked(e -> {
               if (this.isEmpty())
                 return;
-              if (this.getItem().isDirectory() && this.getTreeItem().getChildren().isEmpty()) {
-                for (File child : this.getItem().listFiles()) {
-                  this.getTreeItem().getChildren().add(new TreeItem<File>(child));
+              TreeItem<File> treeItem = this.getTreeItem();
+              ObservableList<TreeItem<File>> children = treeItem.getChildren();
+              if (file.isDirectory() && children.isEmpty()) {
+                for (File child : file.listFiles()) {
+                  if (child.isDirectory())
+                    children.add(new TreeItem<File>(child));
                 }
-                sortTreeChildren(this.getTreeItem().getChildren());
-                this.getTreeItem().setExpanded(true);
-              } else if (this.getItem().isFile()) {
-                // TODO open file
-                System.out.println(this.getItem().getPath());
+                sortTreeChildren(children);
+                treeItem.setExpanded(true);
+              } else if (file.isFile()) {
+                System.out.println(file.getPath()); // TODO open file
               }
             });
-
-          }
-
-          private javafx.scene.Node createArrowGraphic() {
-            Image img = new Image(getClass().getResourceAsStream("/br/ufal/images/folder.png"));
-            ImageView view = new ImageView(img);
-            view.setFitWidth(16);
-            view.setFitHeight(16);
-            return view;
           }
         };
       }
     });
   }
 
-  void sortTreeChildren(List<TreeItem<File>> children) {
+  private Node createArrowGraphic() {
+    Image img = new Image(getClass().getResourceAsStream("/br/ufal/images/folder.png"));
+    ImageView view = new ImageView(img);
+    view.setFitWidth(16);
+    view.setFitHeight(16);
+    return view;
+  }
+
+  private void sortTreeChildren(List<TreeItem<File>> children) {
     children.sort(new Comparator<>() {
       public int compare(TreeItem<File> file1, TreeItem<File> file2) {
         if (file1.getValue().isDirectory() && file2.getValue().isFile())
