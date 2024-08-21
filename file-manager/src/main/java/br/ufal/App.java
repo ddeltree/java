@@ -4,6 +4,9 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -17,7 +20,14 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
+
         scene = new Scene(loadFXML("root"), 800, 480);
+        scene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.H && event.isControlDown()) {
+                ShowHiddenObserver.toggleShowHidden();
+            }
+        });
+
         stage.setScene(scene);
         stage.setTitle("Gerenciador de arquivos POO");
         stage.show();

@@ -27,6 +27,8 @@ import java.nio.file.Path;
 
 public class RootController {
 
+  private static boolean showHidden = false;
+
   @FXML
   private Menu editMenuItem;
 
@@ -50,6 +52,8 @@ public class RootController {
       @Override
       public TreeCell<File> call(TreeView<File> tree) {
         return new TreeCell<File>() {
+          List<TreeItem<File>> hiddenItems = new ArrayList<>();
+
           @Override
           protected void updateItem(File item, boolean empty) {
             super.updateItem(item, empty);
@@ -60,15 +64,28 @@ public class RootController {
             }
             this.setText(item.getName());
             File file = this.getItem();
+            TreeItem<File> treeItem = this.getTreeItem();
+            ObservableList<TreeItem<File>> children = treeItem.getChildren();
             if (file.isDirectory())
               this.setGraphic(createArrowGraphic());
             else
               this.setGraphic(null);
+
+            ShowHiddenObserver.addListener(showHidden -> {
+              List<TreeItem<File>> c = new ArrayList<>(children);
+              for (int i = 0; i < c.size(); i++) {
+                TreeItem<File> child = c.get(i);
+                if (child.getValue().getName().startsWith(".")) {
+                  if (!showHidden) {
+                    hiddenItems.add(child);
+                    children.remove(child);
+                  }
+                }
+              }
+            });
             this.setOnMouseClicked(e -> {
               if (this.isEmpty())
                 return;
-              TreeItem<File> treeItem = this.getTreeItem();
-              ObservableList<TreeItem<File>> children = treeItem.getChildren();
               if (file.isDirectory() && children.isEmpty()) {
                 for (File child : file.listFiles()) {
                   if (child.isDirectory())
