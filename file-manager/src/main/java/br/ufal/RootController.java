@@ -44,16 +44,8 @@ public class RootController {
     for (File child : cwd.listFiles()) {
       fileTree.getRoot().getChildren().add(new TreeItem<>(child));
     }
-    fileTree.getRoot().getChildren().sort(new Comparator<>() {
-      public int compare(TreeItem<File> file1, TreeItem<File> file2) {
-        if (file1.getValue().isDirectory() && file2.getValue().isFile())
-          return -1;
-        else if (file1.getValue().isFile() && file2.getValue().isDirectory())
-          return 1;
-        return file1.getValue().getName().compareToIgnoreCase(file2.getValue().getName());
-      }
-    });
-    this.fileTree.setCellFactory(new Callback<TreeView<File>, TreeCell<File>>() {
+    sortTreeChildren(fileTree.getRoot().getChildren());
+    fileTree.setCellFactory(new Callback<TreeView<File>, TreeCell<File>>() {
       @Override
       public TreeCell<File> call(TreeView<File> tree) {
         return new TreeCell<File>() {
@@ -78,6 +70,7 @@ public class RootController {
                 for (File child : this.getItem().listFiles()) {
                   this.getTreeItem().getChildren().add(new TreeItem<File>(child));
                 }
+                sortTreeChildren(this.getTreeItem().getChildren());
                 this.getTreeItem().setExpanded(true);
               } else if (this.getItem().isFile()) {
                 // TODO open file
@@ -95,6 +88,18 @@ public class RootController {
             return view;
           }
         };
+      }
+    });
+  }
+
+  void sortTreeChildren(List<TreeItem<File>> children) {
+    children.sort(new Comparator<>() {
+      public int compare(TreeItem<File> file1, TreeItem<File> file2) {
+        if (file1.getValue().isDirectory() && file2.getValue().isFile())
+          return -1;
+        else if (file1.getValue().isFile() && file2.getValue().isDirectory())
+          return 1;
+        return file1.getValue().getName().compareToIgnoreCase(file2.getValue().getName());
       }
     });
   }
