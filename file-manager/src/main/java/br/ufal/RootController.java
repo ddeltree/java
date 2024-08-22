@@ -16,7 +16,6 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.SelectionMode;
@@ -28,7 +27,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.RowConstraints;
 import javafx.util.Callback;
 
 public class RootController {
@@ -85,8 +83,7 @@ public class RootController {
                 addTreeItemChildren(treeItem, file.listFiles());
                 sortTreeChildren(children);
                 treeItem.setExpanded(true);
-              } else if (file.isFile())
-                System.out.println(file.getPath()); // TODO open file
+              }
             });
           }
         };
@@ -126,7 +123,15 @@ public class RootController {
     }
     sortByFilename(files);
     for (int i = 0; i < files.size(); i++) {
-      Button fileName = new Button(files.get(i).getName());
+      File file = files.get(i);
+      Button fileName = new Button(file.getName());
+
+      fileName.setOnMouseClicked(e -> {
+        if (file.isDirectory())
+          replaceGridPane(file);
+        else // TODO open file with default program
+          System.out.println(file);
+      });
       fileName.setWrapText(true);
       fileGrid.add(fileName, i % 4, (int) i / 4);
     }
