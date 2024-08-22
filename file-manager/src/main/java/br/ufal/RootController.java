@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-import javafx.application.HostServices;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -29,6 +29,10 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.util.Callback;
+import java.io.IOException;
+import java.awt.Desktop;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 public class RootController {
 
@@ -130,13 +134,31 @@ public class RootController {
       fileName.setOnMouseClicked(e -> {
         if (file.isDirectory())
           replaceGridPane(file);
-        else // TODO open file with default program
-
-          System.out.println(file);
+        else {
+          if (Desktop.isDesktopSupported()) {
+            new Thread(() -> {
+              try {
+                Desktop.getDesktop().open(file);
+              } catch (IOException err) {
+                Platform.runLater(() -> alertCouldNotOpenFile("O arquivo não pôde ser aberto."));
+              }
+            }).start();
+          } else {
+            Platform.runLater(() -> alertCouldNotOpenFile("Não há suporte na plataforma!"));
+          }
+        }
       });
       fileName.setWrapText(true);
       fileGrid.add(fileName, i % 4, (int) i / 4);
     }
+  }
+
+  private void alertCouldNotOpenFile(String msg) {
+    Alert alert = new Alert(AlertType.ERROR);
+    alert.setTitle("Erro");
+    alert.setHeaderText("Erro ao abrir o arquivo");
+    alert.setContentText(msg);
+    alert.showAndWait();
   }
 
   private void addTreeItemChildren(TreeItem<File> item, File... children) {
