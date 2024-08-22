@@ -16,6 +16,10 @@ abstract class ShowHiddenObserver {
     for (Listener hl : listeners)
       hl.onToggleHidden(showHidden);
   }
+
+  public static boolean shouldHide() {
+    return showHidden;
+  }
 }
 
 interface Listener {

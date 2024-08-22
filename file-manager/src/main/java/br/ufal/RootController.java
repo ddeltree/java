@@ -2,6 +2,7 @@ package br.ufal;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -107,26 +108,28 @@ public class RootController {
     MultipleSelectionModel<TreeItem<File>> selectionModel = fileTree.getSelectionModel();
     selectionModel.setSelectionMode(SelectionMode.SINGLE);
     selectionModel.selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-      fileGrid.getChildren().clear();
-      File directory = newValue.getValue();
-      File[] files = directory.listFiles();
-
-      for (int i = 0; i < files.length; i++) {
-        Button fileName = new Button(files[i].getName());
-        fileName.setWrapText(true);
-        fileGrid.add(fileName, i % 4, (int) i / 4);
-      }
-
-      // int numRows = files.length / 4 + 1;
-      // for (int i = 0; i < numRows; i++) {
-      // RowConstraints constraints = new RowConstraints();
-      // constraints.setPercentHeight(100);
-      // fileGrid.getRowConstraints().add(constraints);
-      // }
-
+      replaceGridPane(newValue.getValue());
     });
     selectionModel.select(homeItem);
 
+    ShowHiddenObserver.addListener(showHidden -> {
+      replaceGridPane(selectionModel.getSelectedItem().getValue());
+    });
+  }
+
+  private void replaceGridPane(File directory) {
+    fileGrid.getChildren().clear();
+    List<File> files = new ArrayList<>();
+    for (File file : directory.listFiles()) {
+      if (!file.getName().startsWith(".") || !ShowHiddenObserver.shouldHide())
+        files.add(file);
+    }
+    sortByFilename(files);
+    for (int i = 0; i < files.size(); i++) {
+      Button fileName = new Button(files.get(i).getName());
+      fileName.setWrapText(true);
+      fileGrid.add(fileName, i % 4, (int) i / 4);
+    }
   }
 
   private void addTreeItemChildren(TreeItem<File> item, File... children) {
@@ -147,6 +150,7 @@ public class RootController {
   }
 
   private void sortTreeChildren(List<TreeItem<File>> children) {
+    // TODO refactor to use sortFiles
     children.sort(new Comparator<>() {
       public int compare(TreeItem<File> file1, TreeItem<File> file2) {
         if (file1.getValue().isDirectory() && file2.getValue().isFile())
@@ -154,6 +158,18 @@ public class RootController {
         else if (file1.getValue().isFile() && file2.getValue().isDirectory())
           return 1;
         return file1.getValue().getName().compareToIgnoreCase(file2.getValue().getName());
+      }
+    });
+  }
+
+  private void sortByFilename(List<File> files) {
+    files.sort(new Comparator<>() {
+      public int compare(File file1, File file2) {
+        if (file1.isDirectory() && file2.isFile())
+          return -1;
+        else if (file1.isFile() && file2.isDirectory())
+          return 1;
+        return file1.getName().compareToIgnoreCase(file2.getName());
       }
     });
   }
