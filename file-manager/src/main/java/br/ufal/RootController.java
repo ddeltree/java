@@ -1,25 +1,34 @@
 package br.ufal;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
+import javafx.scene.control.MultipleSelectionModel;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.layout.GridPane;
-import javafx.util.Callback;
-
-import java.io.File;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import java.util.Comparator;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Iterator;
-import java.nio.file.Path;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.RowConstraints;
+import javafx.util.Callback;
 
 public class RootController {
 
@@ -34,6 +43,7 @@ public class RootController {
 
   @FXML
   private void initialize() {
+
     String homeDirectory = System.getProperty("user.home");
     File userHome = new File(homeDirectory);
     TreeItem<File> rootItem = new TreeItem<>(userHome);
@@ -44,7 +54,6 @@ public class RootController {
       TreeItem<File> item = new TreeItem<>(rootDir);
       rootItem.getChildren().add(item);
     }
-
     addTreeItemChildren(homeItem, userHome.listFiles());
     sortTreeChildren(fileTree.getRoot().getChildren());
     fileTree.setCellFactory(new Callback<TreeView<File>, TreeCell<File>>() {
@@ -59,7 +68,7 @@ public class RootController {
               this.setGraphic(null);
               return;
             }
-            this.setText(item.getName());
+            this.setText(item.getName() != "" ? item.getName() : "/");
             File file = this.getItem();
             if (file.isDirectory())
               this.setGraphic(createArrowGraphic());
@@ -82,6 +91,42 @@ public class RootController {
         };
       }
     });
+
+    fileGrid.setHgap(10);
+    fileGrid.setVgap(20);
+    fileGrid.setPadding(new Insets(8));
+    int numColumns = 4;
+    for (int i = 0; i < numColumns; i++) {
+      ColumnConstraints constraints = new ColumnConstraints();
+      constraints.setPercentWidth(25);
+      constraints.setHalignment(HPos.CENTER);
+      constraints.setHgrow(Priority.ALWAYS);
+      fileGrid.getColumnConstraints().add(constraints);
+    }
+
+    MultipleSelectionModel<TreeItem<File>> selectionModel = fileTree.getSelectionModel();
+    selectionModel.setSelectionMode(SelectionMode.SINGLE);
+    selectionModel.selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+      fileGrid.getChildren().clear();
+      File directory = newValue.getValue();
+      File[] files = directory.listFiles();
+
+      for (int i = 0; i < files.length; i++) {
+        Button fileName = new Button(files[i].getName());
+        fileName.setWrapText(true);
+        fileGrid.add(fileName, i % 4, (int) i / 4);
+      }
+
+      // int numRows = files.length / 4 + 1;
+      // for (int i = 0; i < numRows; i++) {
+      // RowConstraints constraints = new RowConstraints();
+      // constraints.setPercentHeight(100);
+      // fileGrid.getRowConstraints().add(constraints);
+      // }
+
+    });
+    selectionModel.select(homeItem);
+
   }
 
   private void addTreeItemChildren(TreeItem<File> item, File... children) {
