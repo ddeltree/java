@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import javafx.application.HostServices;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -130,6 +131,7 @@ public class RootController {
         if (file.isDirectory())
           replaceGridPane(file);
         else // TODO open file with default program
+
           System.out.println(file);
       });
       fileName.setWrapText(true);
