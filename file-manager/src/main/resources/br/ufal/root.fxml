@@ -23,7 +23,7 @@
                   <MenuItem mnemonicParsing="false" onAction="#quit" text="Sair" />
                </items>
             </Menu>
-            <Menu fx:id="editMenuItem" mnemonicParsing="false" text="Editar">
+            <Menu fx:id="editMenu" mnemonicParsing="false" text="Editar">
                <items>
                   <MenuItem fx:id="renameFileMenuItem" mnemonicParsing="false" onAction="#renameFile" text="Renomear" />
                   <MenuItem fx:id="deleteFileMenuItem" mnemonicParsing="false" text="Excluir" />

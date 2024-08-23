@@ -45,6 +45,7 @@ public class RootController {
 
   private VBox gridSelection;
   private TreeItem<File> treeSelection;
+  private File selectedFile;
   private File currentDir;
 
   @FXML
@@ -58,7 +59,6 @@ public class RootController {
 
   @FXML
   private void initialize() {
-
     String homeDirectory = System.getProperty("user.home");
     File userHome = new File(homeDirectory);
     TreeItem<File> rootItem = new TreeItem<>(userHome);
@@ -138,6 +138,7 @@ public class RootController {
 
   private void replaceGridPane(File directory) {
     fileGrid.getChildren().clear();
+    editMenu.setDisable(true);
     currentDir = directory;
     List<File> files = new ArrayList<>();
     for (File file : directory.listFiles()) {
@@ -153,6 +154,8 @@ public class RootController {
           if (gridSelection != null)
             gridSelection.setBackground(null);
           gridSelection = fileName;
+          selectedFile = file;
+          editMenu.setDisable(false);
           BackgroundFill backgroundFill = new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY,
               javafx.geometry.Insets.EMPTY);
           Background background = new Background(backgroundFill);
@@ -263,7 +266,28 @@ public class RootController {
 
   @FXML
   void renameFile(ActionEvent event) {
-
+    TextInputDialog dialog = new TextInputDialog();
+    String targetName = (selectedFile.isFile() ? "arquivo" : "pasta");
+    dialog.setTitle("Renomear " + targetName);
+    dialog.setHeaderText("Insira o novo nome");
+    dialog.setContentText("Nome:");
+    Optional<String> result = dialog.showAndWait();
+    result.ifPresent(name -> {
+      if (!FilenameValidator.isValidFilename(name) || name.strip() == "") {
+        alertCouldNotProcessFile(name + " não é um nome de " + targetName + " válido");
+        return;
+      }
+      File dest = new File(selectedFile.getParentFile(), name);
+      if (dest.exists()) {
+        alertCouldNotProcessFile("O caminho de destino já existe!");
+        return;
+      }
+      selectedFile.renameTo(dest);
+      replaceGridPane(dest.getParentFile());
+    });
+    if (!result.isPresent()) {
+      alertCouldNotProcessFile("É preciso inserir um nome de " + targetName + "!");
+    }
   }
 
   @FXML
