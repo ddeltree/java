@@ -15,8 +15,10 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.SelectionMode;
@@ -28,6 +30,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import java.io.IOException;
 import java.awt.Desktop;
@@ -129,7 +132,8 @@ public class RootController {
     sortByFilename(files);
     for (int i = 0; i < files.size(); i++) {
       File file = files.get(i);
-      Button fileName = new Button(file.getName());
+      // Button fileName = new Button(file.getName());
+      VBox fileName = createGridItem(file);
 
       fileName.setOnMouseClicked(e -> {
         if (file.isDirectory())
@@ -148,9 +152,23 @@ public class RootController {
           }
         }
       });
-      fileName.setWrapText(true);
       fileGrid.add(fileName, i % 4, (int) i / 4);
     }
+  }
+
+  private VBox createGridItem(File file) {
+    Image folderImage = new Image(
+        getClass().getResourceAsStream(file.isDirectory() ? "/br/ufal/images/folder.png" : "/br/ufal/images/file.png"));
+    ImageView folderImageView = new ImageView(folderImage);
+    folderImageView.setFitWidth(32);
+    folderImageView.setFitHeight(32);
+    Label nameLabel = new Label(file.getName());
+    nameLabel.setWrapText(true);
+    nameLabel.alignmentProperty().set(Pos.CENTER);
+    VBox vbox = new VBox(folderImageView, nameLabel);
+    vbox.setSpacing(5); // Optional: spacing between icon and label
+    vbox.alignmentProperty().set(Pos.CENTER);
+    return vbox;
   }
 
   private void alertCouldNotOpenFile(String msg) {
