@@ -43,6 +43,7 @@ import javafx.scene.control.Alert.AlertType;
 public class RootController {
 
   private VBox gridSelection;
+  private TreeItem<File> treeSelection;
 
   @FXML
   private Menu editMenuItem;
@@ -91,6 +92,11 @@ public class RootController {
               if (this.isEmpty())
                 return;
               TreeItem<File> treeItem = this.getTreeItem();
+              if (treeSelection != treeItem) {
+                treeSelection = treeItem;
+                return;
+              }
+              replaceGridPane(treeItem.getValue());
               ObservableList<TreeItem<File>> children = treeItem.getChildren();
               if (file.isDirectory() && children.isEmpty()) {
                 addTreeItemChildren(treeItem, file.listFiles());
@@ -119,6 +125,7 @@ public class RootController {
     selectionModel.setSelectionMode(SelectionMode.SINGLE);
     selectionModel.selectedItemProperty().addListener((observable, oldValue, newValue) -> {
       replaceGridPane(newValue.getValue());
+      treeSelection = newValue;
     });
     selectionModel.select(homeItem);
 
@@ -140,9 +147,8 @@ public class RootController {
       VBox fileName = createGridItem(file);
       fileName.setOnMouseClicked(e -> {
         if (gridSelection != fileName) {
-          if (gridSelection != null) {
+          if (gridSelection != null)
             gridSelection.setBackground(null);
-          }
           gridSelection = fileName;
           BackgroundFill backgroundFill = new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY,
               javafx.geometry.Insets.EMPTY);
@@ -150,9 +156,9 @@ public class RootController {
           fileName.setBackground(background);
           return;
         }
-        if (file.isDirectory())
+        if (file.isDirectory()) {
           replaceGridPane(file);
-        else {
+        } else {
           if (Desktop.isDesktopSupported()) {
             new Thread(() -> {
               try {
