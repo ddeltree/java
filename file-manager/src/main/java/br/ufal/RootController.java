@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.awt.Desktop;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 
 public class RootController {
 
@@ -323,4 +324,36 @@ public class RootController {
       alertCouldNotProcessFile("É preciso inserir um nome de arquivo!");
     }
   }
+
+  @FXML
+  void deleteFile(ActionEvent event) {
+    Alert alert = new Alert(AlertType.CONFIRMATION);
+    alert.setTitle("Aviso");
+    alert.setHeaderText("Deletar arquivo");
+    alert.setContentText("Tem certeza que deseja deletar " + (selectedFile.isDirectory() ? "a pasta" : "o arquivo")
+        + " " + selectedFile.getName());
+    Optional<ButtonType> result = alert.showAndWait();
+    if (result.isPresent() && result.get() == ButtonType.OK) {
+      if (selectedFile.isFile())
+        selectedFile.delete();
+      else
+        deleteDirectory(selectedFile);
+      replaceGridPane(currentDir);
+    }
+  }
+
+  public static boolean deleteDirectory(File directory) {
+    if (directory.isDirectory()) {
+      File[] files = directory.listFiles();
+      if (files != null) {
+        for (File file : files) {
+          if (!deleteDirectory(file)) {
+            return false;
+          }
+        }
+      }
+    }
+    return directory.delete();
+  }
+
 }

@@ -26,7 +26,7 @@
             <Menu fx:id="editMenu" mnemonicParsing="false" text="Editar">
                <items>
                   <MenuItem fx:id="renameFileMenuItem" mnemonicParsing="false" onAction="#renameFile" text="Renomear" />
-                  <MenuItem fx:id="deleteFileMenuItem" mnemonicParsing="false" text="Excluir" />
+                  <MenuItem fx:id="deleteFileMenuItem" mnemonicParsing="false" onAction="#deleteFile" text="Excluir" />
                </items>
             </Menu>
          </menus>
