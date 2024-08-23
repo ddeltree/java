@@ -20,6 +20,7 @@ public class App extends Application {
     public void start(Stage stage) throws IOException {
 
         scene = new Scene(loadFXML("root"), 800, 480);
+        stage.setMaximized(true);
         scene.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.H && event.isControlDown()) {
                 ShowHiddenObserver.toggleShowHidden();

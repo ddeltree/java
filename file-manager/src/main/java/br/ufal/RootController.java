@@ -16,6 +16,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
@@ -33,6 +34,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
@@ -43,6 +45,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 
 public class RootController {
+  int numColumns = 4;
 
   private VBox gridSelection;
   private TreeItem<File> treeSelection;
@@ -112,16 +115,20 @@ public class RootController {
       }
     });
 
-    fileGrid.setHgap(10);
+    fileGrid.setHgap(20);
     fileGrid.setVgap(20);
     fileGrid.setPadding(new Insets(8));
-    int numColumns = 4;
+
+    ColumnConstraints colConstraints = new ColumnConstraints();
+    colConstraints.setHalignment(HPos.CENTER);
+    colConstraints.setPercentWidth(25);
     for (int i = 0; i < numColumns; i++) {
-      ColumnConstraints constraints = new ColumnConstraints();
-      constraints.setPercentWidth(25);
-      constraints.setHalignment(HPos.CENTER);
-      constraints.setHgrow(Priority.ALWAYS);
-      fileGrid.getColumnConstraints().add(constraints);
+      fileGrid.getColumnConstraints().add(colConstraints);
+    }
+    RowConstraints rowConstraints = new RowConstraints();
+    rowConstraints.setValignment(VPos.BOTTOM);
+    for (int i = 0; i < fileGrid.getChildren().size() / numColumns + 1; i++) {
+      fileGrid.getRowConstraints().add(rowConstraints);
     }
 
     MultipleSelectionModel<TreeItem<File>> selectionModel = fileTree.getSelectionModel();
@@ -179,7 +186,7 @@ public class RootController {
           }
         }
       });
-      fileGrid.add(fileName, i % 4, (int) i / 4);
+      fileGrid.add(fileName, i % numColumns, (int) i / numColumns);
     }
   }
 
@@ -195,6 +202,7 @@ public class RootController {
     VBox vbox = new VBox(folderImageView, nameLabel);
     vbox.setSpacing(5); // Optional: spacing between icon and label
     vbox.alignmentProperty().set(Pos.CENTER);
+    vbox.setMinSize(100, 100);
     return vbox;
   }
 
