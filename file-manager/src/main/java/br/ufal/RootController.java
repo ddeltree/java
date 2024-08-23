@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-
+import java.util.Optional;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -21,6 +21,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -44,9 +45,10 @@ public class RootController {
 
   private VBox gridSelection;
   private TreeItem<File> treeSelection;
+  private File currentDir;
 
   @FXML
-  private Menu editMenuItem;
+  private Menu editMenu;
 
   @FXML
   private GridPane fileGrid;
@@ -136,6 +138,7 @@ public class RootController {
 
   private void replaceGridPane(File directory) {
     fileGrid.getChildren().clear();
+    currentDir = directory;
     List<File> files = new ArrayList<>();
     for (File file : directory.listFiles()) {
       if (!file.getName().startsWith(".") || !ShowHiddenObserver.shouldHide())
@@ -164,11 +167,11 @@ public class RootController {
               try {
                 Desktop.getDesktop().open(file);
               } catch (IOException err) {
-                Platform.runLater(() -> alertCouldNotOpenFile("O arquivo não pôde ser aberto."));
+                Platform.runLater(() -> alertCouldNotProcessFile("O arquivo não pôde ser aberto."));
               }
             }).start();
           } else {
-            Platform.runLater(() -> alertCouldNotOpenFile("Não há suporte na plataforma!"));
+            Platform.runLater(() -> alertCouldNotProcessFile("Não há suporte na plataforma!"));
           }
         }
       });
@@ -191,10 +194,10 @@ public class RootController {
     return vbox;
   }
 
-  private void alertCouldNotOpenFile(String msg) {
+  private void alertCouldNotProcessFile(String msg) {
     Alert alert = new Alert(AlertType.ERROR);
     alert.setTitle("Erro");
-    alert.setHeaderText("Erro ao abrir o arquivo");
+    alert.setHeaderText("Erro durante a ação sobre o arquivo");
     alert.setContentText(msg);
     alert.showAndWait();
   }
@@ -256,5 +259,44 @@ public class RootController {
   @FXML
   void quit(ActionEvent event) {
     System.exit(0);
+  }
+
+  @FXML
+  void renameFile(ActionEvent event) {
+
+  }
+
+  @FXML
+  void createFile(ActionEvent event) {
+    TextInputDialog dialog = new TextInputDialog();
+    dialog.setTitle("Criar arquivo");
+    dialog.setHeaderText("Insira o nome do arquivo");
+    dialog.setContentText("Nome:");
+    Optional<String> result = dialog.showAndWait();
+    result.ifPresent(name -> {
+      if (!FilenameValidator.isValidFilename(name) || name.strip() == "") {
+        alertCouldNotProcessFile(name + " não é um nome de arquivo válido");
+        return;
+      }
+      boolean isDirectory = name.endsWith("/");
+      File file = new File(currentDir, name);
+      if (file.exists()) {
+        alertCouldNotProcessFile("O arquivo já existe!");
+        return;
+      }
+      try {
+        if (isDirectory) {
+          file.mkdirs();
+        } else {
+          file.createNewFile();
+        }
+        replaceGridPane(currentDir);
+      } catch (IOException err) {
+        alertCouldNotProcessFile("Erro inesperado ao criar arquivo!");
+      }
+    });
+    if (!result.isPresent()) {
+      alertCouldNotProcessFile("É preciso inserir um nome de arquivo!");
+    }
   }
 }
