@@ -17,7 +17,6 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MultipleSelectionModel;
@@ -27,10 +26,14 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import java.io.IOException;
 import java.awt.Desktop;
@@ -38,6 +41,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 
 public class RootController {
+
+  private VBox gridSelection;
 
   @FXML
   private Menu editMenuItem;
@@ -132,10 +137,19 @@ public class RootController {
     sortByFilename(files);
     for (int i = 0; i < files.size(); i++) {
       File file = files.get(i);
-      // Button fileName = new Button(file.getName());
       VBox fileName = createGridItem(file);
-
       fileName.setOnMouseClicked(e -> {
+        if (gridSelection != fileName) {
+          if (gridSelection != null) {
+            gridSelection.setBackground(null);
+          }
+          gridSelection = fileName;
+          BackgroundFill backgroundFill = new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY,
+              javafx.geometry.Insets.EMPTY);
+          Background background = new Background(backgroundFill);
+          fileName.setBackground(background);
+          return;
+        }
         if (file.isDirectory())
           replaceGridPane(file);
         else {
