@@ -2,8 +2,10 @@ package br.ufal3;
 
 import java.lang.reflect.Field;
 import java.util.Scanner;
+import java.util.stream.Stream;
 import java.util.List;
 import java.util.ArrayList;
+import com.google.gson.Gson;
 
 public class Principal {
     static Scanner scanner = new Scanner(System.in);
@@ -12,28 +14,27 @@ public class Principal {
     }
 
     public static void main(String[] args) throws Exception {
-        String opt = scan("Tipo de colaborador (tecnico / vendedor)").toLowerCase();
-        Colaborador colaborador = opt.equals("tecnico")
+        var opt = scan("Tipo de colaborador\n1. tecnico\n2. vendedor\n\t");
+        Colaborador colaborador = opt.toLowerCase().startsWith("1")
                 ? new Tecnico()
                 : new Vendedor();
 
-        List<Pair<Field, Object>> entries = reflectOn(new Colaborador());
-        entries.addAll(reflectOn(colaborador));
-        for (Pair<Field, Object> entry : entries)
+        var entries = Stream.concat(
+                reflectOn(new Colaborador()).stream(),
+                reflectOn(colaborador).stream()).toList();
+        for (var entry : entries)
             entry.field.set(colaborador, entry.value);
 
-        System.out.println();
-        System.out.println(colaborador.getSalario());
-        System.out.println(((Vendedor) colaborador).getComissao());
-        System.out.println(colaborador.calculaSalario());
+        System.out.println("\nSalário líquido: " + colaborador.calculaSalario());
+        System.out.println(new Gson().toJson(colaborador));
     }
 
     static List<Pair<Field, Object>> reflectOn(Object thing) {
-        List<Pair<Field, Object>> entries = new ArrayList<>();
-        for (Field field : thing.getClass().getDeclaredFields()) {
+        var entries = new ArrayList<Pair<Field, Object>>();
+        for (var field : thing.getClass().getDeclaredFields()) {
             field.setAccessible(true);
-            String input = scan(field.getName());
-            Object value = tryConvertToPrimitive(input, field.getType());
+            var input = scan(field.getName());
+            var value = tryConvertToPrimitive(input, field.getType());
             entries.add(new Pair<>(field, value));
         }
         return entries;
@@ -49,7 +50,7 @@ public class Principal {
         try {
             return convertToPrimitive(input, type);
         } catch (NumberFormatException e) {
-            return null;
+            return 0;
         }
     }
 

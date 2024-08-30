@@ -13,6 +13,6 @@ public class Vendedor extends Colaborador {
 
   @Override
   public double calculaSalario() {
-    return (89 / 100) * (salario + comissao);
+    return (89.0 / 100) * (getSalario() + getComissao());
   }
 }

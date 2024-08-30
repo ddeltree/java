@@ -14,6 +14,6 @@ public class Tecnico extends Colaborador {
 
   @Override
   public double calculaSalario() {
-    return 89 / 100 * super.salario;
+    return 89.0 / 100 * getSalario();
   }
 }
