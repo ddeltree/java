@@ -18,7 +18,9 @@ public class Principal {
         Colaborador colaborador = opt.toLowerCase().startsWith("1")
                 ? new Tecnico()
                 : new Vendedor();
-
+        // Reflete pra pegar os campos da super-classe e da sub-classe.
+        // Para cada campo encontrado, pede um valor ao usuário e o converte para o tipo
+        // primitivo correspondente ao campo.
         var entries = Stream.concat(
                 reflectOn(new Colaborador()).stream(),
                 reflectOn(colaborador).stream()).toList();
