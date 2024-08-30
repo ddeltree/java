@@ -5,5 +5,6 @@
   "java.dependency.syncWithFolderExplorer": false,
   "java.dependency.packagePresentation": "hierarchical",
   "maven.view": "flat",
-  "java.format.settings.profile": "GoogleStyle"
+  "java.format.settings.profile": "GoogleStyle",
+  "java.debug.settings.onBuildFailureProceed": true
 }
