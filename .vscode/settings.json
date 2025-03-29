@@ -2,7 +2,7 @@
   "java.format.enabled": true,
   "editor.formatOnSave": true,
   "java.format.settings.url": "eclipse-formatter.xml",
-  "java.dependency.syncWithFolderExplorer": false,
+  "java.dependency.syncWithFolderExplorer": true,
   "java.dependency.packagePresentation": "hierarchical",
   "maven.view": "flat",
   "java.format.settings.profile": "GoogleStyle",

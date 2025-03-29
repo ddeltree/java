@@ -22,3 +22,5 @@ Thumbs.db
 
 # Maven Wrapper
 .mvn/wrapper/
+
+bin
